@@ -3,9 +3,11 @@
 Command-line interface for the Risk Engine.
 
 Usage:
-    risk-engine                    # Interactive mode (easiest!)
-    risk-engine -i data.csv        # Quick mode with defaults
-    risk-engine -i data.csv -o out/ --simulation on --threshold 4
+    risk-engine                    # Dashboard mode (after login)
+    risk-engine login              # Login to your account
+    risk-engine register           # Register new user
+    risk-engine -i data.csv        # Quick analysis mode
+    risk-engine viewer -o out/     # View results in web browser
 """
 
 import argparse

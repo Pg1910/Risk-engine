@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "risk-engine"
-version = "1.0.0"
-description = "Explainable risk-based transaction anomaly detection engine"
+version = "1.1.0"
+description = "Explainable risk-based transaction anomaly detection engine with authentication and dashboard"
 authors = [{ name = "Your Team" }]
 requires-python = ">=3.9"
 dependencies = [
@@ -30,7 +30,7 @@ classifiers = [
 ]
 
 [project.scripts]
-risk-engine = "risk_engine.cli.main:main"
+risk-engine = "risk_engine.cli_wrapper:main"
 
 [project.urls]
 "Homepage" = "https://github.com/Pg1910/risk-engine"

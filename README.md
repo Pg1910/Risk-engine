@@ -2,7 +2,66 @@
 
 A secure, offline, explainable transaction anomaly detection engine designed for banking environments.
 
+**✨ New Features:**
+- 🔐 Email-based authentication for authorized users
+- 📊 Interactive terminal dashboard with analysis history
+- 🌐 Web-based visualization viewer for charts and results
+
 ## 🚀 Quick Start (For New Users)
+
+### Step 1: Install the Package
+
+```bash
+pip install risk-engine
+```
+
+### Step 2: Register & Login
+
+```bash
+# Register a new user account
+risk-engine register
+
+# Login
+risk-engine login
+```
+
+### Step 3: Use the Dashboard
+
+```bash
+# Launch interactive dashboard
+risk-engine
+```
+
+From the dashboard, you can:
+- Run new analyses
+- View analysis history
+- Open web visualizations
+- Track your statistics
+
+### Alternative: Direct CLI Usage
+
+You can also run analyses directly without the dashboard:
+
+```bash
+risk-engine -i your_transactions.csv -o results/
+```
+
+### View Results in Browser
+
+```bash
+risk-engine viewer -o results/
+```
+
+---
+
+## 📚 Documentation
+
+- **[Authentication & Dashboard Guide](AUTH_GUIDE.md)** - Learn about user accounts, dashboard, and web viewer
+- **[Publishing Guide](PUBLISHING.md)** - How to publish to PyPI
+
+---
+
+## 🚀 Quick Start (Classic Mode)
 
 ### Step 1: Install the Package
 

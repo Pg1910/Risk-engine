@@ -3,11 +3,15 @@ MANIFEST.in
 README.md
 pyproject.toml
 risk_engine/__init__.py
+risk_engine/auth.py
+risk_engine/cli_wrapper.py
+risk_engine/dashboard.py
 risk_engine/engine.py
 risk_engine/io.py
 risk_engine/rules.py
 risk_engine/stats.py
 risk_engine/utils.py
+risk_engine/web_viewer.py
 risk_engine.egg-info/PKG-INFO
 risk_engine.egg-info/SOURCES.txt
 risk_engine.egg-info/dependency_links.txt
