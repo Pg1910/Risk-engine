@@ -7,9 +7,7 @@ A secure, offline, explainable transaction anomaly detection engine designed for
 ### Step 1: Install the Package
 
 ```bash
-# Clone or download the risk_engine folder, then:
-cd risk_engine
-pip install -e .
+pip install risk-engine
 ```
 
 ### Step 2: Prepare Your Data
@@ -58,17 +56,18 @@ The Risk Engine processes large transaction datasets in chunks, applies rule-bas
 
 ## Installation
 
-### From Source (Development)
-
-```bash
-cd risk_engine
-pip install -e .
-```
-
-### From Package
+### From PyPI (Recommended)
 
 ```bash
 pip install risk-engine
+```
+
+### From Source (Development)
+
+```bash
+git clone https://github.com/yourusername/risk-engine.git
+cd risk-engine
+pip install -e .
 ```
 
 ## Usage

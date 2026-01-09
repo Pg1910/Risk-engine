@@ -33,8 +33,8 @@ classifiers = [
 risk-engine = "risk_engine.cli.main:main"
 
 [project.urls]
-"Homepage" = "https://github.com/yourusername/risk-engine"
-"Bug Tracker" = "https://github.com/yourusername/risk-engine/issues"
+"Homepage" = "https://github.com/Pg1910/risk-engine"
+"Bug Tracker" = "https://github.com/Pg1910/risk-engine/issues"
 
 [tool.setuptools.packages.find]
 where = ["."]
