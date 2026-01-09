@@ -1,0 +1,330 @@
+# Explainable Risk-Based Transaction Anomaly Engine
+
+A secure, offline, explainable transaction anomaly detection engine designed for banking environments.
+
+## 🚀 Quick Start (For New Users)
+
+### Step 1: Install the Package
+
+```bash
+# Clone or download the risk_engine folder, then:
+cd risk_engine
+pip install -e .
+```
+
+### Step 2: Prepare Your Data
+
+Your CSV file needs at minimum these columns:
+- `transaction_id` - Unique ID for each transaction
+- `sender_account` - The account making the transaction
+
+For full functionality, also include: `timestamp`, `amount`, `device_hash`, `ip_address`, `location`
+
+### Step 3: Run the Analysis
+
+```bash
+risk-engine -i your_transactions.csv -o results/
+```
+
+### Step 4: View Results
+
+```bash
+# See summary
+cat results/summary.json
+
+# View flagged transactions
+head results/flagged_transactions.csv
+
+# Check what triggered the flags
+cat results/stats_reasons.csv
+```
+
+That's it! 🎉
+
+---
+
+## Overview
+
+The Risk Engine processes large transaction datasets in chunks, applies rule-based risk checks, and generates auditable anomaly alerts with full explainability for each flagged transaction.
+
+## Key Features
+
+- **Offline, Local Execution** - No cloud dependencies, data stays on-premises
+- **Chunk-Based Processing** - Handles 1GB+ CSV files with minimal memory footprint
+- **Explainable Risk Scoring** - Each anomaly includes human-readable reasons
+- **Configurable Thresholds** - Auto-calculated or manually overridden
+- **Velocity Simulation** - Optional stress testing for rapid transaction patterns
+- **Multiple Output Formats** - CSV and Parquet export
+
+## Installation
+
+### From Source (Development)
+
+```bash
+cd risk_engine
+pip install -e .
+```
+
+### From Package
+
+```bash
+pip install risk-engine
+```
+
+## Usage
+
+### Basic Usage
+
+```bash
+risk-engine --input transactions.csv --output-dir outputs/
+```
+
+### With Options
+
+```bash
+risk-engine \
+  --input transactions.csv \
+  --output-dir outputs/ \
+  --threshold 4 \
+  --simulation on \
+  --chunk-size 100000
+```
+
+### All CLI Options
+
+| Option | Short | Description | Default |
+|--------|-------|-------------|---------|
+| `--input` | `-i` | Input CSV file (required) | - |
+| `--output-dir` | `-o` | Output directory (required) | - |
+| `--threshold` | `-t` | Risk score threshold | Auto-calculated |
+| `--simulation` | `-s` | Velocity simulation (`on`/`off`) | `off` |
+| `--chunk-size` | `-c` | Rows per processing chunk | 500,000 |
+| `--quiet` | `-q` | Suppress progress output | False |
+| `--version` | | Show version | - |
+
+### Python API
+
+```python
+from risk_engine import run_engine, process_transactions
+
+# Process a file
+summary = run_engine(
+    input_file="transactions.csv",
+    output_dir="outputs/",
+    threshold=4,
+    simulation=True,
+    chunk_size=100_000
+)
+
+# Or process a DataFrame directly
+import pandas as pd
+df = pd.read_csv("transactions.csv")
+processed = process_transactions(df, simulation_mode=True)
+flagged = processed[processed["final_is_anomalous"]]
+```
+
+## Input Format
+
+The engine expects a CSV with the following columns:
+
+### Required Columns
+
+| Column | Description |
+|--------|-------------|
+| `transaction_id` | Unique transaction identifier |
+| `sender_account` | Account identifier |
+
+### Optional Feature Columns
+
+| Column | Description | Risk Check Enabled |
+|--------|-------------|-------------------|
+| `timestamp` | ISO8601 UTC timestamp | Off-hour detection |
+| `amount` | Transaction amount | Z-score deviation |
+| `device_hash` | Device fingerprint | New device detection |
+| `ip_address` | IP address | New IP detection |
+| `location` | Transaction location | Location change detection |
+
+The engine automatically adapts based on available columns - missing optional columns simply disable their corresponding risk checks.
+
+## Output Files
+
+| File | Description |
+|------|-------------|
+| `flagged_transactions.csv` | All anomalous transactions |
+| `flagged_transactions.parquet` | Same data in Parquet format |
+| `stats_risk_scores.csv` | Risk score distribution |
+| `stats_reasons.csv` | Breakdown of anomaly reasons |
+| `summary.json` | Processing summary |
+
+## Risk Checks
+
+### Amount Deviation
+Flags transactions where the amount is ≥1 standard deviation from the sender's mean.
+
+### New Device
+Flags first-seen devices for each account.
+
+### New IP Address
+Flags first-seen IP addresses for each account.
+
+### Location Change
+Flags when transaction location differs from the previous transaction.
+
+### Off-Hour Activity
+Flags transactions outside the sender's dominant transaction hour.
+
+### Velocity (Simulation Mode)
+Groups transactions into 5-transaction sessions with 10-second intervals to detect rapid-fire patterns.
+
+## Threshold Calculation
+
+The anomaly threshold is automatically calculated based on active risk checks:
+
+| Active Risks | Threshold | Ratio |
+|--------------|-----------|-------|
+| 1 | 1 | 100% |
+| 2 | 2 | 100% |
+| 3 | 3 | 100% |
+| 4 | 3 | 75% |
+| 5 | 4 | 80% |
+| 6+ | 5 | 83% |
+
+Use `--threshold` to override the automatic calculation.
+
+## Example Output
+
+### summary.json
+
+```json
+{
+  "total_transactions": 150000,
+  "flagged_transactions": 7523,
+  "anomaly_rate": 0.050153,
+  "threshold": 4,
+  "features_used": ["amount", "device_hash", "ip_address", "location", "timestamp"]
+}
+```
+
+### flagged_transactions.csv
+
+```csv
+transaction_id,sender_account,timestamp,amount,location,final_risk_score,final_reasons
+TXN001,ACC123,2025-01-08T14:30:00Z,5000.00,Mumbai,4,"Unusual transaction amount; New device detected; Transaction location changed; Transaction at unusual time"
+```
+
+## Requirements
+
+- Python 3.9+
+- pandas ≥ 2.0
+- numpy ≥ 1.23
+- pyarrow ≥ 14.0
+
+---
+
+## 📖 Interpreting Results
+
+### Understanding the Output Files
+
+| File | What It Contains | How to Use It |
+|------|-----------------|---------------|
+| `summary.json` | Overall statistics | Quick health check - see total transactions, flagged count, anomaly rate |
+| `flagged_transactions.csv` | All suspicious transactions | Main investigation file - review each flagged transaction |
+| `flagged_transactions.parquet` | Same as above (binary format) | For loading into pandas/Spark for further analysis |
+| `stats_reasons.csv` | Count of each risk type | Identify most common fraud patterns |
+| `stats_risk_scores.csv` | Distribution of risk scores | Understand the risk profile of your data |
+
+### Understanding Risk Scores
+
+Each transaction gets a **risk score** from 0 to 6 (depending on active features):
+
+| Score | Meaning | Action |
+|-------|---------|--------|
+| 0 | No risks detected | Normal transaction |
+| 1-2 | Low risk | Usually normal, may warrant monitoring |
+| 3-4 | Medium risk | Review recommended |
+| 5+ | High risk | **Flagged as anomalous** - investigate |
+
+### Understanding Anomaly Reasons
+
+Each flagged transaction includes `final_reasons` explaining WHY it was flagged:
+
+| Reason | What It Means | Example |
+|--------|--------------|---------|
+| `Unusual transaction amount` | Amount differs significantly from user's normal spending | User typically spends ₹500-2000, but this transaction is ₹50,000 |
+| `New device detected` | First time this device is seen for this account | User logged in from a new phone |
+| `New IP address detected` | First time this IP is seen for this account | Transaction from a new network/location |
+| `Transaction location changed` | Different location from previous transaction | Previous: Mumbai, Current: Delhi |
+| `Transaction at unusual time` | Transaction outside user's typical hours | User normally transacts at 10 AM, this is at 3 AM |
+| `Multiple transactions in short time` | Rapid successive transactions (simulation mode) | 5 transactions within 50 seconds |
+
+### Example Analysis Workflow
+
+```bash
+# 1. Run the engine
+risk-engine -i transactions.csv -o results/ --simulation on
+
+# 2. Check summary
+cat results/summary.json
+# Output: {"total_transactions": 150000, "flagged_transactions": 304, "anomaly_rate": 0.002}
+
+# 3. See most common fraud patterns
+cat results/stats_reasons.csv
+# Output:
+# reason,count
+# New device detected,304
+# Transaction location changed,280
+# Unusual transaction amount,150
+
+# 4. Investigate flagged transactions
+head -5 results/flagged_transactions.csv
+```
+
+### What Does a Low/High Anomaly Rate Mean?
+
+| Anomaly Rate | Interpretation |
+|--------------|----------------|
+| < 0.1% | Very strict detection - only catching obvious anomalies |
+| 0.1% - 1% | Balanced detection - typical for production use |
+| 1% - 5% | Sensitive detection - may include false positives |
+| > 5% | Very sensitive - consider raising threshold |
+
+**Tip:** Use `--threshold` to adjust sensitivity:
+- Higher threshold (e.g., `--threshold 5`) = fewer flags, higher confidence
+- Lower threshold (e.g., `--threshold 3`) = more flags, may catch more edge cases
+
+---
+
+## 🔧 Troubleshooting
+
+### Common Issues
+
+**"ModuleNotFoundError: No module named 'risk_engine'"**
+```bash
+# Make sure you installed the package
+cd /path/to/risk_engine
+pip install -e .
+```
+
+**"Error: Input file not found"**
+```bash
+# Use absolute path
+risk-engine -i /full/path/to/transactions.csv -o /full/path/to/output/
+```
+
+**"Chunk size must be at least 1000 rows"**
+```bash
+# Default chunk size is 500,000. For small files, just omit --chunk-size
+risk-engine -i small_file.csv -o output/
+```
+
+**High memory usage**
+```bash
+# Reduce chunk size for large files
+risk-engine -i huge_file.csv -o output/ --chunk-size 100000
+```
+
+---
+
+## License
+
+MIT License - see [LICENSE](LICENSE) for details.

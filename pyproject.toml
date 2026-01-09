@@ -1,0 +1,41 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "risk-engine"
+version = "1.0.0"
+description = "Explainable risk-based transaction anomaly detection engine"
+authors = [{ name = "Your Team" }]
+requires-python = ">=3.9"
+dependencies = [
+    "pandas>=2.0",
+    "numpy>=1.23",
+    "pyarrow>=14.0",
+    "matplotlib>=3.7"
+]
+readme = "README.md"
+license = {file = "LICENSE"}
+keywords = ["banking", "anomaly-detection", "risk-engine", "fraud-detection"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Financial and Insurance Industry",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Office/Business :: Financial"
+]
+
+[project.scripts]
+risk-engine = "risk_engine.cli.main:main"
+
+[project.urls]
+"Homepage" = "https://github.com/yourusername/risk-engine"
+"Bug Tracker" = "https://github.com/yourusername/risk-engine/issues"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["risk_engine*"]
