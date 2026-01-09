@@ -10,7 +10,7 @@ from pathlib import Path
 def main():
     """Enhanced main entry point with auth and dashboard."""
     
-    # Special commands
+    # Special commands - check first argument if it exists
     if len(sys.argv) > 1:
         cmd = sys.argv[1]
         
@@ -28,7 +28,7 @@ def main():
             from risk_engine.auth import AuthManager
             auth = AuthManager()
             auth.logout()
-            print("\\n✅ Logged out successfully.")
+            print("\n✅ Logged out successfully.")
             return 0
         
         elif cmd == "viewer":
@@ -42,21 +42,21 @@ def main():
             start_web_viewer(args.output_dir, args.port)
             return 0
         
-        elif cmd in ("-h", "--help", "-v", "--version", "-i", "--input"):
-            # Pass through to original CLI
+        # If it's a CLI argument, pass through to original
+        elif cmd.startswith("-") or cmd.startswith("--"):
             from risk_engine.cli.main import main as original_main
             return original_main()
     
-    # No arguments = Dashboard mode
+    # No arguments = Dashboard mode (only if logged in)
     if len(sys.argv) == 1:
         from risk_engine.auth import AuthManager
         auth = AuthManager()
         session = auth.get_current_session()
         
         if not session:
-            print("\\n⚠️  You need to login first.")
+            print("\n⚠️  You need to login first.")
             print("   Run: risk-engine login")
-            print("   Or:  risk-engine register (for new users)\\n")
+            print("   Or:  risk-engine register (for new users)\n")
             return 1
         
         # Show dashboard
@@ -102,32 +102,32 @@ def main():
                     except:
                         pass
                     
-                    print("\\n" + "="*60)
+                    print("\n" + "="*60)
                     print("  ✅ Analysis Complete!")
                     print("="*60)
                     
                     # Offer web viewer
-                    view_choice = input("\\n🌐 Open results in web browser? [Y/n]: ").strip().lower()
+                    view_choice = input("\n🌐 Open results in web browser? [Y/n]: ").strip().lower()
                     if view_choice not in ('n', 'no'):
                         from risk_engine.web_viewer import start_web_viewer
-                        print("\\nStarting web viewer...")
+                        print("\nStarting web viewer...")
                         start_web_viewer(config["output_dir"])
                     
                 except KeyboardInterrupt:
-                    print("\\n\\nOperation cancelled.")
+                    print("\n\nOperation cancelled.")
                 except Exception as e:
-                    print(f"\\n❌ Error: {e}")
+                    print(f"\n❌ Error: {e}")
                     import traceback
                     traceback.print_exc()
                 
-                input("\\nPress Enter to return to dashboard...")
+                input("\nPress Enter to return to dashboard...")
             
             elif choice == "2":
                 show_history()
             
             elif choice == "3":
                 # Web viewer
-                print("\\n📂 Enter output directory to visualize:")
+                print("\n📂 Enter output directory to visualize:")
                 recent = dashboard.get_recent_analyses(1)
                 if recent:
                     default_dir = recent[0]['output_dir']
@@ -136,7 +136,7 @@ def main():
                     output_dir = input("   Path: ").strip()
                 
                 if output_dir and Path(output_dir).exists():
-                    print("\\n🌐 Starting web viewer...")
+                    print("\n🌐 Starting web viewer...")
                     from risk_engine.web_viewer import start_web_viewer
                     start_web_viewer(output_dir)
                 else:
@@ -144,7 +144,7 @@ def main():
             
             elif choice == "4":
                 auth.logout()
-                print("\\n👋 Logged out successfully.\\n")
+                print("\n👋 Logged out successfully.\n")
                 return 0
             
             else:
