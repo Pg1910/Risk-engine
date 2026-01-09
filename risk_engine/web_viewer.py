@@ -38,190 +38,569 @@ class RiskEngineWebHandler(SimpleHTTPRequestHandler):
         """Send the main dashboard HTML."""
         html = """
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Risk Engine - Visualization Dashboard</title>
+    <title>Risk Engine - Analytics Dashboard</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary: #0f172a;
+            --secondary: #1e293b;
+            --accent: #3b82f6;
+            --danger: #ef4444;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --text: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --border: #334155;
+            --card-bg: #1e293b;
+            --hover: #334155;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--primary);
+            color: var(--text);
+            line-height: 1.6;
             min-height: 100vh;
-            padding: 20px;
         }
+        
+        /* Top Navigation */
+        .navbar {
+            background: var(--secondary);
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+        }
+        
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .nav-brand h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text);
+        }
+        
+        .nav-brand .icon {
+            font-size: 2rem;
+        }
+        
+        .nav-info {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+        
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            border-radius: 9999px;
+            color: var(--success);
+            font-weight: 500;
+        }
+        
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--success);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        /* Main Container */
         .container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
+            padding: 2rem;
         }
-        .header {
-            background: white;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            margin-bottom: 20px;
-        }
-        h1 {
-            color: #667eea;
-            font-size: 2em;
-            margin-bottom: 10px;
-        }
-        .subtitle { color: #666; }
-        .grid {
+        
+        /* Stats Cards Grid */
+        .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
-            margin-bottom: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
         }
-        .card {
-            background: white;
-            padding: 25px;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        
+        .stat-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
         }
-        .card h2 {
-            color: #333;
-            font-size: 1.3em;
-            margin-bottom: 15px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #667eea;
+        
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent), var(--success));
+            opacity: 0;
+            transition: opacity 0.3s;
         }
-        .stat {
+        
+        .stat-card:hover {
+            border-color: var(--accent);
+            transform: translateY(-2px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+        }
+        
+        .stat-card:hover::before {
+            opacity: 1;
+        }
+        
+        .stat-header {
             display: flex;
             justify-content: space-between;
-            padding: 10px 0;
-            border-bottom: 1px solid #eee;
+            align-items: center;
+            margin-bottom: 1rem;
         }
-        .stat:last-child { border-bottom: none; }
-        .stat-label { color: #666; }
-        .stat-value { font-weight: bold; color: #333; }
-        .alert { background: #fef5e7; padding: 15px; border-radius: 5px; margin: 15px 0; }
-        .image-gallery {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-            gap: 20px;
+        
+        .stat-title {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
-        .image-card {
-            background: white;
-            padding: 20px;
+        
+        .stat-icon {
+            width: 40px;
+            height: 40px;
             border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
         }
-        .image-card h3 {
-            color: #667eea;
-            margin-bottom: 15px;
+        
+        .stat-value {
+            font-size: 2.25rem;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 0.5rem;
         }
-        .image-card img {
-            width: 100%;
-            border-radius: 5px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        
+        .stat-change {
+            font-size: 0.875rem;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
         }
-        .loading {
-            text-align: center;
-            padding: 50px;
-            color: white;
-            font-size: 1.2em;
+        
+        .stat-change.positive { color: var(--success); }
+        .stat-change.negative { color: var(--danger); }
+        
+        /* Main Content Cards */
+        .content-grid {
+            display: grid;
+            gap: 2rem;
+            margin-bottom: 2rem;
         }
+        
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            transition: border-color 0.3s;
+        }
+        
+        .card:hover {
+            border-color: var(--accent);
+        }
+        
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: between;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        /* Table Styles */
+        .table-container {
+            overflow-x: auto;
+            border-radius: 8px;
+        }
+        
         table {
             width: 100%;
-            border-collapse: collapse;
-            margin-top: 15px;
+            border-collapse: separate;
+            border-spacing: 0;
         }
-        th, td {
-            padding: 12px;
-            text-align: left;
-            border-bottom: 1px solid #eee;
+        
+        thead {
+            background: rgba(59, 130, 246, 0.1);
         }
+        
         th {
-            background: #f8f9fa;
+            padding: 1rem;
+            text-align: left;
             font-weight: 600;
-            color: #667eea;
+            font-size: 0.875rem;
+            color: var(--text);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid var(--border);
         }
-        tr:hover { background: #f8f9fa; }
-        .error-msg {
-            color: #e74c3c;
-            padding: 20px;
+        
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-secondary);
+        }
+        
+        tbody tr {
+            transition: background-color 0.2s;
+        }
+        
+        tbody tr:hover {
+            background: var(--hover);
+        }
+        
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .risk-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+        
+        .risk-high {
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--danger);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+        
+        .risk-medium {
+            background: rgba(245, 158, 11, 0.2);
+            color: var(--warning);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+        
+        .risk-low {
+            background: rgba(16, 185, 129, 0.2);
+            color: var(--success);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+        
+        /* Visualization Grid */
+        .viz-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+        
+        .viz-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+        }
+        
+        .viz-card:hover {
+            border-color: var(--accent);
+            transform: translateY(-2px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+        }
+        
+        .viz-card img {
+            width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin-top: 1rem;
+            background: white;
+            padding: 1rem;
+        }
+        
+        .viz-card h3 {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 0.5rem;
+        }
+        
+        .viz-description {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+        
+        /* Loading State */
+        .loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 400px;
+            gap: 1rem;
+        }
+        
+        .spinner {
+            width: 48px;
+            height: 48px;
+            border: 4px solid var(--border);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Error State */
+        .error-card {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            border-radius: 12px;
+            padding: 2rem;
             text-align: center;
+            color: var(--danger);
+        }
+        
+        .error-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .navbar {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+            
+            .container {
+                padding: 1rem;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .viz-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .stat-value {
+                font-size: 1.75rem;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>🏦 Risk Engine - Visualization Dashboard</h1>
-            <p class="subtitle">Transaction Anomaly Detection Results</p>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-brand">
+            <span class="icon">🛡️</span>
+            <h1>Risk Engine Analytics</h1>
         </div>
-        
+        <div class="nav-info">
+            <div class="status-badge">
+                <span class="status-dot"></span>
+                Live Monitoring
+            </div>
+            <span id="last-update">Updated just now</span>
+        </div>
+    </nav>
+    
+    <!-- Main Container -->
+    <div class="container">
         <div id="content" class="loading">
-            Loading data...
+            <div class="spinner"></div>
+            <p>Loading analytics data...</p>
         </div>
     </div>
     
     <script>
+        function formatNumber(num) {
+            if (num >= 1000000) return (num / 1000000).toFixed(2) + 'M';
+            if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
+            return num.toString();
+        }
+        
+        function getRiskBadge(score) {
+            if (score >= 5) return '<span class="risk-badge risk-high">High Risk</span>';
+            if (score >= 3) return '<span class="risk-badge risk-medium">Medium Risk</span>';
+            return '<span class="risk-badge risk-low">Low Risk</span>';
+        }
+        
         async function loadData() {
             try {
                 const summaryRes = await fetch('/api/summary');
                 const summary = await summaryRes.json();
                 
-                let html = '<div class="grid">';
+                const flaggedRes = await fetch('/api/flagged');
+                const flagged = await flaggedRes.json();
                 
-                // Summary Stats
-                html += '<div class="card"><h2>📊 Summary</h2>';
-                for (const [key, value] of Object.entries(summary)) {
-                    const label = key.replace(/_/g, ' ').replace(/\\b\\w/g, l => l.toUpperCase());
-                    html += `<div class="stat"><span class="stat-label">${label}</span><span class="stat-value">${value}</span></div>`;
-                }
-                html += '</div>';
+                let html = '';
                 
-                html += '</div>';
+                // Stats Cards
+                html += '<div class="stats-grid">';
+                
+                // Total Transactions
+                html += `<div class="stat-card">
+                    <div class="stat-header">
+                        <span class="stat-title">Total Transactions</span>
+                        <div class="stat-icon" style="background: rgba(59, 130, 246, 0.1); color: var(--accent);">📊</div>
+                    </div>
+                    <div class="stat-value">${formatNumber(summary.total_transactions || 0)}</div>
+                    <div class="stat-change">Processed transactions</div>
+                </div>`;
                 
                 // Flagged Transactions
-                try {
-                    const flaggedRes = await fetch('/api/flagged');
-                    const flagged = await flaggedRes.json();
+                const flagRate = summary.total_transactions ? 
+                    ((summary.total_flagged / summary.total_transactions) * 100).toFixed(2) : 0;
+                html += `<div class="stat-card">
+                    <div class="stat-header">
+                        <span class="stat-title">Flagged Anomalies</span>
+                        <div class="stat-icon" style="background: rgba(239, 68, 68, 0.1); color: var(--danger);">🚨</div>
+                    </div>
+                    <div class="stat-value">${formatNumber(summary.total_flagged || 0)}</div>
+                    <div class="stat-change negative">${flagRate}% of total</div>
+                </div>`;
+                
+                // Detection Rate
+                html += `<div class="stat-card">
+                    <div class="stat-header">
+                        <span class="stat-title">Detection Rate</span>
+                        <div class="stat-icon" style="background: rgba(16, 185, 129, 0.1); color: var(--success);">✓</div>
+                    </div>
+                    <div class="stat-value">${flagRate}%</div>
+                    <div class="stat-change">Anomaly detection accuracy</div>
+                </div>`;
+                
+                // Average Risk Score
+                const avgRisk = summary.avg_risk_score ? summary.avg_risk_score.toFixed(2) : 'N/A';
+                html += `<div class="stat-card">
+                    <div class="stat-header">
+                        <span class="stat-title">Avg Risk Score</span>
+                        <div class="stat-icon" style="background: rgba(245, 158, 11, 0.1); color: var(--warning);">⚡</div>
+                    </div>
+                    <div class="stat-value">${avgRisk}</div>
+                    <div class="stat-change">Mean risk level</div>
+                </div>`;
+                
+                html += '</div>';
+                
+                // Content Grid
+                html += '<div class="content-grid">';
+                
+                // Flagged Transactions Table
+                if (flagged && flagged.length > 0) {
+                    html += `<div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">🚨 High-Risk Transactions</h2>
+                        </div>
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Transaction ID</th>
+                                        <th>Sender Account</th>
+                                        <th>Risk Level</th>
+                                        <th>Anomaly Reasons</th>
+                                    </tr>
+                                </thead>
+                                <tbody>`;
                     
-                    if (flagged.length > 0) {
-                        html += '<div class="card"><h2>🚨 Flagged Transactions (Top 10)</h2>';
-                        html += '<div style="overflow-x: auto;"><table>';
-                        html += '<tr><th>Transaction ID</th><th>Risk Score</th><th>Reasons</th></tr>';
-                        
-                        flagged.slice(0, 10).forEach(row => {
-                            html += `<tr>`;
-                            html += `<td>${row.transaction_id || 'N/A'}</td>`;
-                            html += `<td>${row.risk_score || 'N/A'}</td>`;
-                            html += `<td>${row.reasons || 'N/A'}</td>`;
-                            html += `</tr>`;
-                        });
-                        
-                        html += '</table></div></div>';
-                    }
-                } catch (e) {
-                    console.error('Could not load flagged transactions:', e);
+                    flagged.slice(0, 10).forEach(row => {
+                        html += `<tr>
+                            <td><strong>${row.transaction_id || 'N/A'}</strong></td>
+                            <td>${row.sender_account || 'N/A'}</td>
+                            <td>${getRiskBadge(row.risk_score || 0)}</td>
+                            <td style="max-width: 400px; white-space: normal;">${row.reasons || 'N/A'}</td>
+                        </tr>`;
+                    });
+                    
+                    html += `</tbody></table></div></div>`;
                 }
                 
-                // Images
-                const images = [
-                    'risk_score_distribution.png',
-                    'top_anomaly_reasons.png',
-                    'flagged_vs_normal.png'
+                html += '</div>';
+                
+                // Visualizations
+                html += '<div class="viz-grid">';
+                
+                const vizData = [
+                    { file: 'charts/01_anomaly_reasons.png', title: 'Anomaly Breakdown', desc: 'Distribution of anomaly detection reasons' },
+                    { file: 'charts/02_risk_score_distribution.png', title: 'Risk Score Distribution', desc: 'Frequency distribution of risk scores' },
+                    { file: 'charts/03_hourly_distribution.png', title: 'Temporal Analysis', desc: 'Anomalies detected by hour of day' },
+                    { file: 'charts/04_top_accounts.png', title: 'High-Risk Accounts', desc: 'Top accounts by anomaly frequency' },
+                    { file: 'charts/05_amount_distribution.png', title: 'Transaction Amounts', desc: 'Distribution of flagged transaction amounts' }
                 ];
                 
-                html += '<div class="image-gallery">';
-                for (const img of images) {
-                    const title = img.replace('.png', '').replace(/_/g, ' ').replace(/\\b\\w/g, l => l.toUpperCase());
-                    html += `<div class="image-card">`;
-                    html += `<h3>${title}</h3>`;
-                    html += `<img src="/${img}" alt="${title}" onerror="this.parentElement.style.display='none'">`;
-                    html += `</div>`;
-                }
+                vizData.forEach(viz => {
+                    html += `<div class="viz-card">
+                        <h3>${viz.title}</h3>
+                        <p class="viz-description">${viz.desc}</p>
+                        <img src="/${viz.file}" alt="${viz.title}" onerror="this.parentElement.style.display='none'">
+                    </div>`;
+                });
+                
                 html += '</div>';
                 
                 document.getElementById('content').innerHTML = html;
+                document.getElementById('last-update').textContent = 'Updated ' + new Date().toLocaleTimeString();
                 
             } catch (error) {
-                document.getElementById('content').innerHTML = 
-                    '<div class="card error-msg">❌ Error loading data. Make sure the analysis has been run.</div>';
+                document.getElementById('content').innerHTML = `
+                    <div class="error-card">
+                        <h3>⚠️ Unable to Load Data</h3>
+                        <p>Please ensure the analysis has been completed and output files are available.</p>
+                        <p style="margin-top: 1rem; font-size: 0.875rem; opacity: 0.7;">${error.message}</p>
+                    </div>`;
                 console.error('Error:', error);
             }
         }
