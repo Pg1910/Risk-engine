@@ -89,13 +89,13 @@ class Dashboard:
         os.system('clear' if os.name != 'nt' else 'cls')
         
         print("\n" + "="*70)
-        print("  🏦 Risk Engine - Dashboard")
+        print("  RISK ENGINE - ANALYTICS DASHBOARD")
         print("="*70 + "\n")
         
         # User Info
-        print(f"👤 User: {self.user_email}")
+        print(f"User: {self.user_email}")
         if user_info:
-            print(f"   Role: {user_info['role'].upper()}")
+            print(f"Role: {user_info['role'].upper()}")
             if user_info.get('last_login'):
                 last_login = datetime.fromisoformat(user_info['last_login'])
                 print(f"   Last Login: {last_login.strftime('%Y-%m-%d %H:%M')}")
@@ -103,7 +103,7 @@ class Dashboard:
         print("\n" + "-"*70)
         
         # Statistics
-        print("\n📊 Your Statistics:")
+        print("\nSTATISTICS:")
         print(f"   Total Analyses Run:      {stats['total_analyses']}")
         print(f"   Transactions Processed:  {stats['total_transactions_processed']:,}")
         print(f"   Flagged Transactions:    {stats['total_flagged']:,}")
@@ -112,7 +112,7 @@ class Dashboard:
         print("\n" + "-"*70)
         
         # Recent Analyses
-        print("\n📋 Recent Analyses:")
+        print("\nRECENT ANALYSES:")
         if recent:
             for i, analysis in enumerate(recent, 1):
                 timestamp = datetime.fromisoformat(analysis['timestamp'])
@@ -127,7 +127,7 @@ class Dashboard:
         print("\n" + "="*70)
         
         # Menu
-        print("\n🎯 What would you like to do?")
+        print("\nMENU OPTIONS:")
         print("   1. Run New Analysis")
         print("   2. View Analysis History")
         print("   3. View Web Dashboard")
@@ -158,21 +158,21 @@ def show_history():
     history_file = config_dir / "analysis_history.json"
     
     if not history_file.exists():
-        print("\n📋 No analysis history found.")
+        print("\nNo analysis history found.")
         return
     
     try:
         history = json.loads(history_file.read_text())
     except json.JSONDecodeError:
-        print("\n❌ Error reading history file.")
+        print("\n[ERROR] Error reading history file.")
         return
     
     if not history:
-        print("\n📋 No analyses recorded yet.")
+        print("\nNo analyses recorded yet.")
         return
     
     print("\n" + "="*70)
-    print("  📋 Analysis History")
+    print("  ANALYSIS HISTORY")
     print("="*70 + "\n")
     
     for i, record in enumerate(reversed(history), 1):

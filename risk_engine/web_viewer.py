@@ -444,7 +444,7 @@ class RiskEngineWebHandler(SimpleHTTPRequestHandler):
     <!-- Navigation -->
     <nav class="navbar">
         <div class="nav-brand">
-            <span class="icon">🛡️</span>
+            <span class="icon" style="font-weight: bold; color: var(--accent); font-size: 1.5rem;">[RE]</span>
             <h1>Risk Engine Analytics</h1>
         </div>
         <div class="nav-info">
@@ -494,7 +494,7 @@ class RiskEngineWebHandler(SimpleHTTPRequestHandler):
                 html += `<div class="stat-card">
                     <div class="stat-header">
                         <span class="stat-title">Total Transactions</span>
-                        <div class="stat-icon" style="background: rgba(59, 130, 246, 0.1); color: var(--accent);">📊</div>
+                        <div class="stat-icon" style="background: rgba(59, 130, 246, 0.1); color: var(--accent); font-weight: bold;">Σ</div>
                     </div>
                     <div class="stat-value">${formatNumber(summary.total_transactions || 0)}</div>
                     <div class="stat-change">Processed transactions</div>
@@ -506,7 +506,7 @@ class RiskEngineWebHandler(SimpleHTTPRequestHandler):
                 html += `<div class="stat-card">
                     <div class="stat-header">
                         <span class="stat-title">Flagged Anomalies</span>
-                        <div class="stat-icon" style="background: rgba(239, 68, 68, 0.1); color: var(--danger);">🚨</div>
+                        <div class="stat-icon" style="background: rgba(239, 68, 68, 0.1); color: var(--danger); font-weight: bold;">!</div>
                     </div>
                     <div class="stat-value">${formatNumber(summary.total_flagged || 0)}</div>
                     <div class="stat-change negative">${flagRate}% of total</div>
@@ -516,7 +516,7 @@ class RiskEngineWebHandler(SimpleHTTPRequestHandler):
                 html += `<div class="stat-card">
                     <div class="stat-header">
                         <span class="stat-title">Detection Rate</span>
-                        <div class="stat-icon" style="background: rgba(16, 185, 129, 0.1); color: var(--success);">✓</div>
+                        <div class="stat-icon" style="background: rgba(16, 185, 129, 0.1); color: var(--success); font-weight: bold;">✓</div>
                     </div>
                     <div class="stat-value">${flagRate}%</div>
                     <div class="stat-change">Anomaly detection accuracy</div>
@@ -527,7 +527,7 @@ class RiskEngineWebHandler(SimpleHTTPRequestHandler):
                 html += `<div class="stat-card">
                     <div class="stat-header">
                         <span class="stat-title">Avg Risk Score</span>
-                        <div class="stat-icon" style="background: rgba(245, 158, 11, 0.1); color: var(--warning);">⚡</div>
+                        <div class="stat-icon" style="background: rgba(245, 158, 11, 0.1); color: var(--warning); font-weight: bold;">μ</div>
                     </div>
                     <div class="stat-value">${avgRisk}</div>
                     <div class="stat-change">Mean risk level</div>
@@ -542,7 +542,7 @@ class RiskEngineWebHandler(SimpleHTTPRequestHandler):
                 if (flagged && flagged.length > 0) {
                     html += `<div class="card">
                         <div class="card-header">
-                            <h2 class="card-title">🚨 High-Risk Transactions</h2>
+                            <h2 class="card-title">⚠ High-Risk Transactions</h2>
                         </div>
                         <div class="table-container">
                             <table>
@@ -597,7 +597,7 @@ class RiskEngineWebHandler(SimpleHTTPRequestHandler):
             } catch (error) {
                 document.getElementById('content').innerHTML = `
                     <div class="error-card">
-                        <h3>⚠️ Unable to Load Data</h3>
+                        <h3>⚠ Unable to Load Data</h3>
                         <p>Please ensure the analysis has been completed and output files are available.</p>
                         <p style="margin-top: 1rem; font-size: 0.875rem; opacity: 0.7;">${error.message}</p>
                     </div>`;
@@ -690,7 +690,7 @@ def start_web_viewer(output_dir: str, port: int = 8080):
     output_path = Path(output_dir).resolve()
     
     if not output_path.exists():
-        print(f"❌ Output directory not found: {output_dir}")
+        print(f"[ERROR] Output directory not found: {output_dir}")
         return
     
     # Change to output directory
@@ -703,9 +703,9 @@ def start_web_viewer(output_dir: str, port: int = 8080):
         server = HTTPServer(('localhost', port), handler)
         url = f'http://localhost:{port}'
         
-        print(f"\n🌐 Web viewer starting at {url}")
-        print(f"📂 Serving files from: {output_path}")
-        print("   Press Ctrl+C to stop the server\n")
+        print(f"\n[SERVER] Web viewer starting at {url}")
+        print(f"[INFO] Serving files from: {output_path}")
+        print("[INFO] Press Ctrl+C to stop the server\n")
         
         # Open browser
         webbrowser.open(url)
@@ -714,12 +714,12 @@ def start_web_viewer(output_dir: str, port: int = 8080):
         server.serve_forever()
         
     except KeyboardInterrupt:
-        print("\n\n👋 Server stopped.")
+        print("\n\n[SERVER] Server stopped.")
     except OSError as e:
         if "Address already in use" in str(e):
-            print(f"\n❌ Port {port} is already in use. Try a different port.")
+            print(f"\n[ERROR] Port {port} is already in use. Try a different port.")
         else:
-            print(f"\n❌ Error starting server: {e}")
+            print(f"\n[ERROR] Error starting server: {e}")
 
 
 def start_web_viewer_background(output_dir: str, port: int = 8080):
